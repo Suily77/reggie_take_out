@@ -3,13 +3,21 @@ package com.psl.reggie.controller;
 import com.psl.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -18,9 +26,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/common")
 @Slf4j
+@PropertySource("classpath:application.yml")
 public class CommonController {
     //获取配置文件的变量
+
+//    @Value("${}")
+
     @Value("${reggie.path}")
+    //java.io.FileNotFoundException: D:\img (拒绝访问。)
     private String basePath;
 
     /**
@@ -38,7 +51,11 @@ public class CommonController {
         //截取.jpg .jpge
         String suffix=orginfilename.substring(orginfilename.lastIndexOf("."));
         //使用UUID重新生成文件名，防止文件名称重复造成文件覆盖
-        String fileName = UUID.randomUUID().toString()+suffix;
+        Date date = new Date();
+
+       //生成时间戳
+        long timestamp = System.currentTimeMillis();
+        String fileName = UUID.randomUUID().toString()+"-"+timestamp+suffix;
         //创建一个目录对象
         File dir = new File(basePath);
         //判断当前目录是否存在
@@ -54,8 +71,62 @@ public class CommonController {
         }
         return R.success(fileName);
     }
-    @RequestMapping("/download")
-    public R<String> download(){
-        return R.success("下载图片完成。。。");
+
+    /**
+     *
+     * @param name 可以加@RequestBody，也可以不加，不加要和前端数据名称一致
+     * @param response
+     */
+    /*@GetMapping("/download")
+    public void download(String name, HttpServletResponse response){
+
+        try {
+            //输入流，通过输入流读取文件内容
+            FileInputStream fileInputStream = new FileInputStream(new File(basePath + name));
+
+            //输出流，通过输出流将文件写回浏览器
+            ServletOutputStream outputStream = response.getOutputStream();
+
+            response.setContentType("image/jpeg");
+
+            int len = 0;
+            byte[] bytes = new byte[1024];
+            while ((len = fileInputStream.read(bytes)) != -1){
+                outputStream.write(bytes,0,len);
+                outputStream.flush();
+            }
+
+            //关闭资源
+            outputStream.close();
+            fileInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }*/
+    @GetMapping("/download")
+    public void download(String name, HttpServletResponse response) {
+        log.info("name:"+name);
+        log.info("request:==========>"+response.toString());
+        try(ServletOutputStream outputStream = response.getOutputStream();FileInputStream fileInputStream = new FileInputStream(new File(basePath+name));){
+            //输入流，通过输入流读取文件内容
+            //输出流，通过输出流将文件写回浏览器
+            response.setContentType("image/jpeg");
+            int len;
+            byte[] bytes = new byte[1024];
+//            len=fileInputStream.read(bytes);//条件写在外面会卡死了
+//            while(len!=-1){
+//                outputStream.write(bytes,0,len);
+//                outputStream.flush();
+//            }
+            while ((len = fileInputStream.read(bytes)) != -1){
+                outputStream.write(bytes,0,len);
+                outputStream.flush();
+            }
+        } catch (IOException e) {
+            log.info(e.getMessage());
+            e.getMessage();
+            e.printStackTrace();
+        }
     }
 }

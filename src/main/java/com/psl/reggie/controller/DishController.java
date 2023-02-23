@@ -54,12 +54,12 @@ public class DishController {
      * @return
      */
     @PostMapping("/status/{status}")
-    public R<String> updata(@PathVariable("status")Integer status ,Long ids,Dish dish){
+    public R<String> updateStatus(@PathVariable("status")Integer status ,Long ids,Dish dish){
         log.info("{}==============={}",status,ids);
         System.out.println(dish);
         dish.setId(ids);
         dishService.updateById(dish);
-        return R.success("修改成功。。。");
+        return R.success("修改状态Status成功。。。");
     }
 
     /**
@@ -68,7 +68,7 @@ public class DishController {
      * @return
      */
     @GetMapping("{id}")
-    public R<DishDto> updata(@PathVariable Long id){
+    public R<DishDto> getById(@PathVariable Long id){
         log.info(id.toString());
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         if(dishDto != null){
@@ -78,6 +78,15 @@ public class DishController {
     }
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto){
+        if(dishDto!=null){
+            log.info("..............{}",dishDto);
+            dishService.updateWithFlavor(dishDto);
+            return R.success("修改成功。。。");
+        }
+        return R.error("修改成功。。。");
+    }
+    @PostMapping
+    public R<String> save(@RequestBody DishDto dishDto){
         if(dishDto!=null){
             log.info("..............{}",dishDto);
             dishService.updateWithFlavor(dishDto);
