@@ -53,8 +53,6 @@ public class DishController {
         queryWrapper.orderByAsc(Dish::getSort);
         //page1的地址与dishPage地址一样
         Page page1 = dishService.page(dishPage, queryWrapper);
-        log.info("pagePage:{}",dishPage);
-        log.info("page1:{}",page1);
         //复制Page
         BeanUtils.copyProperties(dishPage,dtoPage,"records");
         //制定最新的命名为records的集合
@@ -62,9 +60,9 @@ public class DishController {
         List<Dish> dishs=dishPage.getRecords();
         //List不能复制,只能复制entity实体类
         BeanUtils.copyProperties(dishs,dishDtos1);
-
+        //stream流
         List<DishDto> collect = dishs.stream().map(dish -> {
-
+            //创建dishdto的实体类
             DishDto dishDto = new DishDto();
             Long categoryId = dish.getCategoryId();
             Category byId = categoryService.getById(categoryId);
@@ -79,19 +77,38 @@ public class DishController {
 
     /**
      *
-     * @param status
+     * @param status 1.启售 2.停售
      * @param ids
-     * @param dish 将status也传给Dish dish的status
+     *  将status也传给Dish dish的status
      * @return
      */
+//    @PostMapping("/status/{status}")
+//    public R<String> updateStatus(@PathVariable("status")Integer status ,Long ids,Dish dish){
+//        log.info("{}==============={}",status,ids);
+//        dish.setId(ids);
+//        dishService.updateById(dish);
+//        return R.success("修改状态Status成功。。。");
+//    }
     @PostMapping("/status/{status}")
-    public R<String> updateStatus(@PathVariable("status")Integer status ,Long ids,Dish dish){
+    public R<String> updateStatus(@PathVariable("status")Integer status ,Long [] ids){
         log.info("{}==============={}",status,ids);
-        dish.setId(ids);
-        dishService.updateById(dish);
+        ArrayList<Dish> dishes = new ArrayList<>();
+        Dish dish = new Dish();
+        for (Long id : ids) {
+            dish.setId(id);
+            dish.setStatus(status);
+            dishService.updateById(dish);
+        }
         return R.success("修改状态Status成功。。。");
+//        List<Dish> dishes1 = dishes.stream().map(dish11 -> {
+//            for (Long id : ids) {
+//                dish.setId(id);
+//                dish.setStatus(status);
+//            }
+//            return dish;
+//        }).collect(Collectors.toList());
+//        dishService.updateBatchById(dishes1);
     }
-
     /**
      * 根据id连表查询
      * @param id
@@ -131,7 +148,7 @@ public class DishController {
     public R<String> save(@RequestBody DishDto dishDto){
         if(dishDto!=null){
             log.info("..............{}",dishDto);
-            dishService.updateWithFlavor(dishDto);
+            dishService.saveWithFlavor(dishDto);
             return R.success("保存成功。。。");
         }
         return R.error("保存失败。。。");

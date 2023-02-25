@@ -14,4 +14,7 @@ public interface DishService extends IService<Dish> {
 
     public boolean updateWithFlavor(DishDto dishDto);
 
+    public boolean updateWithFlavor1(DishDto dishDto);
+
+    public void saveWithFlavor(DishDto dishDto);
 }

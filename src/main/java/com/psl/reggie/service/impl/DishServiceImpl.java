@@ -17,6 +17,7 @@ import com.psl.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
     CategoryService categoryService;
     @Autowired
     DishFlavorService dishFlavorService;
-
+    @Autowired
+    DishService dishService;
     /**
      * 实现查询DishDto
      * @param id
@@ -50,7 +52,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
         BeanUtils.copyProperties(dish,dishDto);
         //Dish dish2 = super.baseMapper.selectById(id);
         Long categoryId = dish.getCategoryId();
-        //System.out.println(dish2);
         Category category = categoryService.getById(categoryId);
         dishDto.setCategoryName(category.getName());
         LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
@@ -60,20 +61,36 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
         log.info(String.valueOf(dishDto));
         return dishDto;
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateWithFlavor(DishDto dishDto) {
+        log.info(dishDto.toString());
+        this.updateById(dishDto);
+        //清理当前菜品对应口味数据---dish_flavor表的delete操作
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DishFlavor::getDishId,dishDto.getId());
+        dishFlavorService.remove(queryWrapper);
+        //添加当前提交过来的口味数据---dish_flavor表的insert操作
+        List<DishFlavor> flavors = dishDto.getFlavors();
+        flavors = flavors.stream().map((item) -> {
+            item.setDishId(dishDto.getId());
+            return item;
+        }).collect(Collectors.toList());
+        return dishFlavorService.saveBatch(flavors);
+    }
+    @Override
+    @Deprecated
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateWithFlavor1(DishDto dishDto) {
         log.info(dishDto.toString());
         Dish dish = new Dish();
         //复制到dish
         BeanUtils.copyProperties(dishDto,dish);
         log.info(dish.toString());
-
         Integer insert = this.baseMapper.updateById(dish);
         //更新或者插入flavor表
         List<DishFlavor> flavors = dishDto.getFlavors();
-        //先删除所有的，再根据id修改复活，或者新增id
+        //先删除所有的，新增id
             int counts = dishFlavorService.count(new LambdaQueryWrapper<DishFlavor>()
                     .eq(DishFlavor::getDishId, dish.getId()).eq(DishFlavor::getIsDeleted,0));
             if(counts>0){
@@ -101,6 +118,27 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
 //            }
         }).collect(Collectors.toList());
         return ( null!=insert && insert >= 1);
+    }
 
+    /**
+     * 新增菜品，同时保存对应的口味数据
+     * @param dishDto
+     */
+    @Transactional
+    @Override
+    public void saveWithFlavor(DishDto dishDto) {
+        log.info(dishDto.toString());//DishDto(flavors=[], categoryName=null, copies=null)
+        //1.保存到Dish表，创建Dish对象，因为DishDto不能直接保存
+        //this.save
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDto,dish);
+        dishService.save(dish);//==this.save(dishDto);==dishService.save(dishDto);
+        Long id = dish.getId();
+        //flavor可以新增多条数据
+        List<DishFlavor> flavors = dishDto.getFlavors().stream().map(dishFlavor -> {
+            dishFlavor.setDishId(id);
+            return dishFlavor;
+        }).collect(Collectors.toList());
+        dishFlavorService.saveBatch(flavors);
     }
 }
