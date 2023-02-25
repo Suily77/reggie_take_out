@@ -107,7 +107,6 @@ public class CommonController {
     @GetMapping("/download")
     public void download(String name, HttpServletResponse response) {
         log.info("name:"+name);
-        log.info("request:==========>"+response.toString());
         try(ServletOutputStream outputStream = response.getOutputStream();FileInputStream fileInputStream = new FileInputStream(new File(basePath+name));){
             //输入流，通过输入流读取文件内容
             //输出流，通过输出流将文件写回浏览器
