@@ -3,6 +3,9 @@ package com.psl.reggie.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.psl.reggie.dto.DishDto;
 import com.psl.reggie.entity.Dish;
+
+import java.util.List;
+
 /**
  * @description 菜品管理
  * @author psl
@@ -17,4 +20,6 @@ public interface DishService extends IService<Dish> {
     public boolean updateWithFlavor1(DishDto dishDto);
 
     public void saveWithFlavor(DishDto dishDto);
+
+    public boolean delectByIds(List<Long> longs);
 }

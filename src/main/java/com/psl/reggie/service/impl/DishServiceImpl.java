@@ -141,4 +141,17 @@ public class DishServiceImpl extends ServiceImpl<DishMapper,Dish> implements Dis
         }).collect(Collectors.toList());
         dishFlavorService.saveBatch(flavors);
     }
+    @Transactional
+    @Override
+    public boolean delectByIds(List<Long> longs) {
+        dishService.removeByIds(longs);
+        longs.stream().map(dishid->{
+            LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(DishFlavor::getDishId,dishid);
+            dishFlavorService.remove(queryWrapper);
+            return dishid;
+        }).collect(Collectors.toList());
+
+        return true;
+    }
 }

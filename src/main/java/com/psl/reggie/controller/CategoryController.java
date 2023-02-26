@@ -104,4 +104,5 @@ public class CategoryController {
         list=categoryService.list(queryWrapper);
         return R.success(list);
     }
+
 }

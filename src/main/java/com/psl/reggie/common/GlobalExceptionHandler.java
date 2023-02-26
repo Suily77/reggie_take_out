@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(CustomExpection.class)
     public R<String> exceptionHandler(CustomExpection ex) {
-
+        //拦截异常打印到前台
         return R.error(ex.getMessage());
     }
 }

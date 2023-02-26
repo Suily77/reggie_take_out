@@ -19,7 +19,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
      */
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-        log.info("开始映射、、、、、");
+        log.info("开始映射、、、、、前端到后端");
         registry.addResourceHandler("/backend/**")
                 .addResourceLocations("classpath:/backend/");
         registry.addResourceHandler("/front/**")
@@ -27,6 +27,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     }
     /**
      * 扩展mvc框架的消息转换器
+     * json转换器添加进入
      * @param converters
      */
     @Override

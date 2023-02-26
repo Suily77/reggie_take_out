@@ -14,11 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @description 菜品管理
@@ -43,6 +47,7 @@ public class DishController {
      */
     @GetMapping("/page")
     public R<Page> page(int page,int pageSize,String name){
+        //TODO
         Page<Dish> dishPage = new Page<Dish>(page,pageSize);
         Page<DishDto> dtoPage = new Page<>();
         Page<Dish> dishPage1 = new Page();
@@ -50,7 +55,7 @@ public class DishController {
         //模糊查询
         queryWrapper.like(StringUtils.isNotBlank(name),Dish::getName,name);
         //排序
-        queryWrapper.orderByAsc(Dish::getSort);
+        queryWrapper.orderByDesc(Dish::getUpdateTime);
         //page1的地址与dishPage地址一样
         Page page1 = dishService.page(dishPage, queryWrapper);
         //复制Page
@@ -66,22 +71,19 @@ public class DishController {
             DishDto dishDto = new DishDto();
             Long categoryId = dish.getCategoryId();
             Category byId = categoryService.getById(categoryId);
-            dishDto.setCategoryName(byId.getName());
+            if(byId != null){
+                dishDto.setCategoryName(byId.getName());
+            }
             BeanUtils.copyProperties(dish,dishDto);
             return dishDto;
         }).collect(Collectors.toList());
 
         dtoPage.setRecords(collect);
-        return R.success(dishPage);
+
+        return R.success(dtoPage);
     }
 
-    /**
-     *
-     * @param status 1.启售 2.停售
-     * @param ids
-     *  将status也传给Dish dish的status
-     * @return
-     */
+
 //    @PostMapping("/status/{status}")
 //    public R<String> updateStatus(@PathVariable("status")Integer status ,Long ids,Dish dish){
 //        log.info("{}==============={}",status,ids);
@@ -89,6 +91,13 @@ public class DishController {
 //        dishService.updateById(dish);
 //        return R.success("修改状态Status成功。。。");
 //    }
+    /**
+     *
+     * @param status  1.启售 2.停售
+     * @param ids
+     *  将status也传给Dish dish的status
+     * @return
+     */
     @PostMapping("/status/{status}")
     public R<String> updateStatus(@PathVariable("status")Integer status ,Long [] ids){
         log.info("{}==============={}",status,ids);
@@ -116,6 +125,7 @@ public class DishController {
      */
     @GetMapping("{id}")
     public R<DishDto> getById(@PathVariable Long id){
+        //TODO
         log.info(id.toString());
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         if(dishDto != null){
@@ -131,6 +141,7 @@ public class DishController {
      */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto){
+        //TODO
         if(dishDto!=null){
             log.info("..............{}",dishDto);
             dishService.updateWithFlavor(dishDto);
@@ -152,5 +163,29 @@ public class DishController {
             return R.success("保存成功。。。");
         }
         return R.error("保存失败。。。");
+    }
+    @DeleteMapping
+    public R<String> delect(Long[] ids){
+        log.info(Arrays.toString(ids));
+        log.info(Arrays.asList(ids).toString());
+        List<Long> longs = Arrays.asList(ids);
+        boolean b = dishService.delectByIds(longs);
+       if(b){
+           return R.success("删除成功！！！");
+       }
+        return R.success("删除失败！！！");
+
+    }
+    @GetMapping("/list")
+    public R<List<DishDto>> list(Long categoryId){
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dish::getCategoryId,categoryId);
+        List<Dish> list = dishService.list(queryWrapper);
+        List<DishDto> dishDtos = list.stream().map(dish -> {
+            Long id = dish.getId();
+            DishDto byIdWithFlavor = dishService.getByIdWithFlavor(id);
+            return byIdWithFlavor;
+        }).collect(Collectors.toList());
+        return R.success(dishDtos);
     }
 }
