@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
         }
         return R.error("未知错误");
     }
-    @ExceptionHandler(CustomExpection.class)
-    public R<String> exceptionHandler(CustomExpection ex) {
+    @ExceptionHandler(CustomException.class)
+    public R<String> exceptionHandler(CustomException ex) {
         //拦截异常打印到前台
         return R.error(ex.getMessage());
     }

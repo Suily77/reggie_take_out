@@ -59,4 +59,32 @@ public class OrderController {
         }
         return R.success(str);
     }
+
+    /**
+     * 移动端用户下单
+     * @param orders
+     * @return
+     */
+    @PostMapping("/submit")
+    public R<String> submit(@RequestBody Orders orders){
+        log.info("订单数据：{}",orders);
+        orderService.submit(orders);
+        return R.success("下单成功");
+    }
+
+    /**
+     * 下单完,订单详情
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping("/userPage")
+    public R<Page> userPage(int page,int pageSize){
+        Page<Orders> pageInfo = new Page<>(page, pageSize);
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        //排序
+        queryWrapper.orderByDesc(Orders::getOrderTime);
+        orderService.page(pageInfo,queryWrapper);
+        return R.success(pageInfo);
+    }
 }

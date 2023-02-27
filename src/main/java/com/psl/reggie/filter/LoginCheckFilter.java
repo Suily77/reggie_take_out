@@ -35,6 +35,7 @@ public class LoginCheckFilter implements Filter{
 
         //定义不需要处理的请求路径
         String[] urls = new String[]{
+                "/user/login",
                 "/employee/login",
                 "/employee/logout",
                 "/backend/**",
@@ -60,7 +61,6 @@ public class LoginCheckFilter implements Filter{
             BaseContext.setCurrentId(empId);
             //拦截请求
             filterChain.doFilter(request,response);
-
 
             return;
         }

@@ -43,7 +43,6 @@ public class CategoryController {
 
         //创建LambaWrapperQuery
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.
         //模糊查询，根据姓名查询
         queryWrapper.like(StringUtils.isNotBlank(name),Category::getName,name);
         //排序
@@ -94,14 +93,33 @@ public class CategoryController {
         }
         return R.error("分类信息删除失败。。。") ;
     }
+//    @GetMapping("/list")
+////    //Integer type参数也行
+////    public R<List<Category>> saveDish(Category category){
+////        log.info("type");
+////        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+////        queryWrapper.eq(category.getType()!=null,Category::getType,category.getType());
+////        List<Category> list = new ArrayList<>();
+////        list=categoryService.list(queryWrapper);
+////        return R.success(list);
+////    }
+
+    /**
+     * 移动端功能
+     * 根据条件查询分类数据
+     * @param category
+     * @return
+     */
     @GetMapping("/list")
-    //Integer type参数也行
-    public R<List<Category>> saveDish(Category category){
-        log.info("type");
+    public R<List<Category>> list(Category category){
+        //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(category.getType()!=null,Category::getType,category.getType());
-        List<Category> list = new ArrayList<>();
-        list=categoryService.list(queryWrapper);
+        //添加条件
+        queryWrapper.eq(category.getType() != null,Category::getType,category.getType());
+        //添加排序条件
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+
+        List<Category> list = categoryService.list(queryWrapper);
         return R.success(list);
     }
 

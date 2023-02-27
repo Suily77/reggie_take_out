@@ -24,7 +24,7 @@
             <div class="divUser">
                 <img src="./../images/headPage.png"/>
                 <div class="desc">
-                    <div class="divName">林之迷 <img src="./../images/women.png"/></div>
+                    <div class="divName">{{userName}} <img src="./../images/women.png"/></div>
                     <div class="divPhone">{{userPhone}}</div>
                 </div>
             </div>
@@ -83,6 +83,7 @@
     <script src="./../api/order.js"></script>
     <script src="./../api/login.js"></script>
     <script>
+        console.log(sessionStorage)
         new Vue({
             el:"#user",
             data(){
@@ -102,6 +103,8 @@
                         amount:undefined,//实收金额
                         sumNum:0,//菜品总数
                     }],
+                    //psl新增
+                    userName:'daa'
                 }
             },
             computed:{},
@@ -132,9 +135,13 @@
                         page:1,
                         pageSize:1
                     }
+
                     const res = await orderPagingApi(params)
                     if(res.code === 1){
                         this.order = res.data.records
+                        console.log("t",this.order[0].userName)
+                        this.userName=this.order[0].userName;
+                        this.order[0].userName
                         if(this.order && this.order[0].orderDetails){
                             let number = 0
                             this.order[0].orderDetails.forEach(item=>{

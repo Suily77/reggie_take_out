@@ -2,10 +2,8 @@ package com.psl.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.psl.reggie.common.CustomExpection;
-import com.psl.reggie.dto.DishDto;
+import com.psl.reggie.common.CustomException;
 import com.psl.reggie.dto.SetmealDto;
-import com.psl.reggie.entity.Dish;
 import com.psl.reggie.entity.Setmeal;
 import com.psl.reggie.entity.SetmealDish;
 import com.psl.reggie.mapper.SetmealMapper;
@@ -104,7 +102,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         int count=this.count(queryWrapper);
         if(count>0){
             //如果不能删除，抛出一个业务异常
-            throw  new CustomExpection("套餐正在售卖中，不能删除");
+            throw  new CustomException("套餐正在售卖中，不能删除");
         }
         //如果可以删除，先删除套餐表中的数据---setmeal
         this.removeByIds(setmealids);

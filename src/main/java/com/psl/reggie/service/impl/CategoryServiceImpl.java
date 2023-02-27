@@ -2,7 +2,7 @@ package com.psl.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.psl.reggie.common.CustomExpection;
+import com.psl.reggie.common.CustomException;
 import com.psl.reggie.entity.Category;
 import com.psl.reggie.entity.Dish;
 import com.psl.reggie.entity.Setmeal;
@@ -32,7 +32,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
             //已经关联菜品，抛出一个业务异常
 
 //            return false;
-            throw new CustomExpection("当前分类下关联了菜品，不能删除");
+            throw new CustomException("当前分类下关联了菜品，不能删除");
         }
         //查询当前分类是否关联了套餐，如果已经关联，抛出一个业务异常
         LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -41,7 +41,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         int count2 = setmealService.count(setmealLambdaQueryWrapper);
         if (count2 > 0) {
             //已经关联套餐，抛出一个业务异常
-            throw new CustomExpection("当前分类下关联了套餐，不能删除");
+            throw new CustomException("当前分类下关联了套餐，不能删除");
         }
 //        return super.removeById(ids);
         return super.removeById(ids);
