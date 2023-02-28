@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -79,12 +80,15 @@ public class OrderController {
      * @return
      */
     @GetMapping("/userPage")
-    public R<Page> userPage(int page,int pageSize){
+    public R<Page> userPage(int page, int pageSize, HttpSession session){
         Page<Orders> pageInfo = new Page<>(page, pageSize);
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Orders::getUserId,session.getAttribute("user"));
         //排序
         queryWrapper.orderByDesc(Orders::getOrderTime);
         orderService.page(pageInfo,queryWrapper);
         return R.success(pageInfo);
     }
+//    LTAI5tFrfXhLbBLV4bGqjMvJ
+//            HqCr22vV9hhwPciZxpIe3K31k4WlSF
 }
